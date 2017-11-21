@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#author = "王栎汉 2017年11月21日"
 import scrapy
 
 
