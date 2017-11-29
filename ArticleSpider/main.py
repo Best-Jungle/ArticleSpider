@@ -1,5 +1,5 @@
 # _*_ coding: utf-8 _*_
-__author__ = "wangyh"
+# __author__ = "wangyh"
 from  scrapy.cmdline import execute
 import sys
 import os

@@ -5,9 +5,12 @@ from scrapy.http import Request
 from  urllib import parse
 import re
 from ArticleSpider.items import JobBoleArticleItem
+from ArticleSpider.utils.common import get_md5
+import datetime
 
 
 class JobboleSpider(scrapy.Spider):
+    #spider 类
     name = 'jobbole'
     allowed_domains = ['blog.jobbole.com']
     start_urls = ['http://blog.jobbole.com/all-posts/']
@@ -19,7 +22,7 @@ class JobboleSpider(scrapy.Spider):
         for post_node in post_nodes:#单个页面中循环处理
             image_url = post_node.css("img::attr(src)").extract_first("")
             post_url = post_node.css("::attr(href)").extract_first("")
-            yield Request(url=parse.urljoin(response.url,post_url),meta={"front_image_url":parse.urljoin(response.url,image_url) },self.parse_detail) #meta 将数据打包传到 response 中
+            yield Request(url=parse.urljoin(response.url,post_url),meta={"front_image_url":parse.urljoin(response.url,image_url) }, callback=self.parse_detail) #meta 将数据打包传到 response 中
 
 
         next_urls = response.css(".next.page-numbers a::attr(href)")#两个 class 并行，取消中间空格
@@ -32,9 +35,11 @@ class JobboleSpider(scrapy.Spider):
     def parse_detail(self,response): #处理每篇文章页面中内容
         print("开始")
         article_item = JobBoleArticleItem()
+        #xpath 抓取方式
         # title = response.xpath('//*[@id="post-110287"]/div[1]/h1/text()').extract()[0]
         # create_date = response.xpath('//*[@id="post-110287"]/div[2]/p/text()').extract()[0].strip().replace("·","").strip()
-        front_image_url = response.meta.get("font_image_url","")
+
+        front_image_url = response.meta.get("front_image_url","")
         title = response.css(".entry-header h1::text").extract_first() #标题
         create_date = response.css("p.entry-meta-hide-on-mobile::text").extract_first().strip().replace("·","").strip()#创建日期
         praise_nums = response.css(".vote-post-up h10::text").extract_first()#点赞数
@@ -52,13 +57,19 @@ class JobboleSpider(scrapy.Spider):
             comment_nums = 0
 
         content = response.css("div.entry").extract_first()#文章内容
-        tags = response.css("p.entry-meta-hide-on-mobile a::text").extract()#所属类别
+        tag_list = response.css("p.entry-meta-hide-on-mobile a::text").extract()#所属类别
         tag_list = [element for element in tag_list if not element.strip().endswith("评论")]
-        tag = ",".join(tag_list)
+        tags = ",".join(tag_list)
+
         article_item["title"] = title
         article_item["url"] = response.url
+        article_item["url_object_id"] = get_md5(response.url)
+        try:
+            create_date = datetime.datetime.strptime(create_date, "%Y/%m/%d").date()
+        except Exception as e:
+            create_date = datetime.datetime.now().date()
         article_item["create_date"] = create_date
-        article_item["front_image_url"] = front_image_url
+        article_item["front_image_url"] = [front_image_url]
         article_item["praise_nums"] = praise_nums
         article_item["comment_nums"] = comment_nums
         article_item["fav_nums"] = fav_nums
