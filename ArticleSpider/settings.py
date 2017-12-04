@@ -65,14 +65,14 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   # 'ArticleSpider.pipelines.JsonExporterPipleline': 2,
-   # 'scrapy.pipelines.images.ImagesPipeline': 1,
-   # 'ArticleSpider.pipelines.ArticleImagePipeline': 1,
-    'ArticleSpider.pipelines.MysqlPipleline': 1,
+   'ArticleSpider.pipelines.JsonWithEncodingPipeline': 3,
+   # 11'scrapy.pipelines.images.ImagesPipeline': 1,
+   'ArticleSpider.pipelines.ArticleImagePipeline': 2,
+    'ArticleSpider.pipelines.MysqlTwistedPipline': 6,
 }
-IMAGES_URLS_FIELD = "front_image_url"
+IMAGES_URLS_FIELD = "front_image_url" #scrapy 寻找这个字段下载图片
 project_dir = os.path.abspath(os.path.dirname(__file__))
-IMAGES_STORE = os.path.join(project_dir, 'images')
+IMAGES_STORE = os.path.join(project_dir, 'images')#image 的保存路径
 
 #设定下载图片的长宽高
 # IMAGES_MIN_HEIGHT = 100
@@ -98,3 +98,8 @@ IMAGES_STORE = os.path.join(project_dir, 'images')
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+MYSQL_HOST = "172.21.15.14"
+MYSQL_DBNAME = "article_spider"
+MYSQL_USER = "root"
+MYSQL_PASSWORD = "123456"
